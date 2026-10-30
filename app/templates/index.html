@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Séries de maths</title>
+<title>Séries de maths · Prof Tachefine</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f4e8c'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='serif'>∑</text></svg>">
 <style>
 :root{
@@ -240,7 +240,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:36px}
       <div class="logo" aria-hidden="true">∑</div>
       <div>
         <h1>Séries de maths</h1>
-        <p>Ton en-tête sur n'importe quelle série<span v-if="health.correction">, et une correction détaillée en PDF</span>.</p>
+        <p>Espace privé de Prof Tachefine : ton en-tête sur n'importe quelle série<span v-if="health.correction">, et une correction détaillée en PDF</span>.</p>
       </div>
     </div>
     <div class="top-r">
@@ -251,8 +251,8 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:36px}
 
   <section class="card login" v-if="needLogin">
     <div class="lock"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-    <h2>Connexion</h2>
-    <p class="hint" style="margin:0 0 16px">Cette application est protégée par un mot de passe.</p>
+    <h2>Espace réservé à Prof Tachefine</h2>
+    <p class="hint" style="margin:0 0 16px">Cette application est destinée <strong>exclusivement à Prof Tachefine</strong>, professeur de mathématiques, pour préparer ses séries d'exercices. L'accès est protégé par un mot de passe personnel ; si vous n'êtes pas Prof Tachefine, merci de ne pas tenter de vous connecter.</p>
     <form @submit.prevent="doLogin">
       <label class="field">
         Mot de passe
@@ -545,7 +545,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:36px}
   </template>
   </template>
 
-  <footer>Les fichiers sont supprimés du serveur après 24 h ; tes séries terminées restent enregistrées dans ce navigateur.</footer>
+  <footer>Application privée, à l'usage exclusif de Prof Tachefine.<br>Les fichiers sont supprimés du serveur après 24 h ; tes séries terminées restent enregistrées dans ce navigateur.</footer>
 </div>
 
 <script src="/static/vue/vue.global.prod.js"></script>
