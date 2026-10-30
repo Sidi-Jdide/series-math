@@ -99,7 +99,7 @@ def run(src: Path, workdir: Path, opt: Options, log) -> dict:
     base = slug(src.stem)
     claude_ai.reset_cost()
     # clé de réutilisation : contenu du fichier envoyé + modèle et réflexion utilisés
-    key = [hashlib.sha256(src.read_bytes()).hexdigest(), claude_ai.MODEL, claude_ai.EFFORT, claude_ai.MOCK,
+    key = [hashlib.sha256(src.read_bytes()).hexdigest(), claude_ai.MODEL, claude_ai.ANALYSE_MODEL, claude_ai.EFFORT, claude_ai.MOCK,
            claude_ai.PROMPTS_VERSION]
     reused = []
 

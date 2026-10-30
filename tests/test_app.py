@@ -344,3 +344,24 @@ def test_file_name_describes_content():
     ident = Identity(prof="Tachefine", titre="SERIE : REELS ET ANGLES", classes="3AS - 4AS")
     assert _file_name(ident, "4AS_CN_25_25_S2") == "Serie_Reels_et_Angles_3AS_4AS_tachefine"
     assert _file_name(Identity(prof="Tachefine", titre="SERIE"), "envoi") == "envoi_tachefine"
+
+
+def test_analyse_uses_haiku_then_main_model_on_refusal(monkeypatch):
+    from types import SimpleNamespace as NS
+    from app import claude_ai
+    calls = []
+    usage = NS(input_tokens=10, output_tokens=5, cache_creation_input_tokens=0, cache_read_input_tokens=0)
+
+    def create(**kw):
+        calls.append(kw["model"])
+        if kw["model"] == "claude-haiku-5-5":
+            return NS(model=kw["model"], usage=usage, stop_reason="refusal", content=[])
+        return NS(model=kw["model"], usage=usage, stop_reason="tool_use",
+                  content=[NS(type="tool_use", input={"titre": "SERIE : ANGLES"})])
+
+    monkeypatch.setattr(claude_ai, "MOCK", False)
+    monkeypatch.setattr(claude_ai, "BATCH", False)
+    monkeypatch.setattr(claude_ai, "_pdf_text", lambda p: "mot " * 50)
+    monkeypatch.setattr(claude_ai, "client", lambda: NS(messages=NS(create=create)))
+    assert claude_ai.analyse("x.pdf") == {"titre": "SERIE : ANGLES"}
+    assert calls == ["claude-haiku-5-5", "claude-opus-5-5"]

@@ -83,6 +83,7 @@ environ, et les séries de la veille sont alors perdues : il suffit de les renvo
 | `CORRECTION` | `1` pour proposer aussi la correction détaillée (coûte beaucoup plus de crédits et de temps) | `0` (désactivée) |
 | `RESAISIE` | `1` pour proposer aussi « re-saisir proprement » (scans, exercices à retirer). Sinon, un scan garde son image avec le nouvel en-tête | `0` (désactivée) |
 | `CLAUDE_BATCH` | `1` : l'analyse passe par l'API Batch d'Anthropic, moitié prix mais 1 à quelques minutes d'attente (24 h au pire). `0` : réponse en quelques secondes | `1` |
+| `CLAUDE_ANALYSE_MODEL` | Modèle qui lit le sujet (anciens noms, titre). Haiku coûte environ 0,1 centime par série ; si Haiku refuse ou ne répond pas correctement, l'app redemande une fois au modèle principal (`CLAUDE_MODEL`) | `claude-haiku-5-5` |
 | `CLAUDE_EFFORT` | Réflexion de Claude pour la correction et la re-saisie : `low`, `medium` ou `high` (moins = moins cher) | `medium` |
 | `CLAUDE_MAX_TOKENS` | Longueur maximale d'une réponse (une suite est demandée automatiquement si besoin) | `64000` |
 | `MAX_UPLOAD_MB` | Taille maximale d'un fichier | `25` |

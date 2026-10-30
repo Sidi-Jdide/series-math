@@ -12,6 +12,8 @@ import anthropic
 import pymupdf as fitz
 
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-5-5")
+# lecture du sujet (anciens noms, titre) : tâche simple, Haiku suffit et coûte ~40 fois moins qu'Opus
+ANALYSE_MODEL = os.environ.get("CLAUDE_ANALYSE_MODEL", "claude-haiku-5-5")
 BATCH = os.environ.get("CLAUDE_BATCH", "1") == "1"   # analyse via l'API Batch : moitié prix, quelques minutes d'attente
 BATCH_POLL = 15   # secondes entre deux vérifications du lot
 EFFORT = os.environ.get("CLAUDE_EFFORT", "medium")   # réflexion pour la correction : low, medium, high
@@ -68,10 +70,10 @@ def _pdf_block(pdf_path: str, cache: bool = True) -> dict:
 _FALLBACK_MODELS = {"claude-opus-5-5", "claude-opus-5", "claude-fable-5-1", "claude-sonnet-5-5"}
 
 
-def _extra(effort: str) -> dict:
+def _extra(effort: str, model: str = MODEL) -> dict:
     """Paramètres communs : niveau de réflexion (effort) et repli automatique en cas de refus."""
     kw: dict = {"output_config": {"effort": effort}}
-    if MODEL in _FALLBACK_MODELS:
+    if model in _FALLBACK_MODELS:
         kw["extra_headers"] = {"anthropic-beta": "server-side-fallback-2026-07-01"}
         kw["extra_body"] = {"fallbacks": "default"}
     return kw
@@ -170,21 +172,26 @@ def analyse(pdf_path: str) -> dict:
         return dict(NO_INFO)
     # tool_choice forcé (« tool » / « any ») est refusé par les modèles récents : « auto » + consigne explicite
     params = dict(
-        model=MODEL, max_tokens=16000, system=SYSTEM, tools=[ANALYSE_TOOL], tool_choice={"type": "auto"},
+        max_tokens=16000, system=SYSTEM, tools=[ANALYSE_TOOL], tool_choice={"type": "auto"},
         messages=[{"role": "user", "content": (
             "Voici le texte extrait d'une série d'exercices (PDF). Repère tout ce qui identifie l'ancien professeur "
             "ou l'ancienne école (en-têtes, pieds de page, bandeaux, filigranes), le titre de la série et le nombre "
             "d'exercices. Réponds uniquement en appelant l'outil analyse_sujet.\n\n" + text)}],
     )
-    if BATCH:   # le repli automatique en cas de refus n'existe pas dans l'API Batch
-        msg = _batch({**params, "output_config": {"effort": "low"}}, "analyse")
-    else:
-        msg = client().messages.create(**params, **_extra("low"))
-    _track(msg, "analyse", batch=BATCH)
-    _check(msg)
-    for b in msg.content:
-        if b.type == "tool_use":
-            return dict(b.input)
+    # Haiku d'abord ; s'il refuse ou ne remplit pas l'outil (rare), une seconde demande avec le modèle principal
+    for i, model in enumerate(dict.fromkeys([ANALYSE_MODEL, MODEL])):
+        last = i == len({ANALYSE_MODEL, MODEL}) - 1
+        if BATCH:   # le repli automatique en cas de refus n'existe pas dans l'API Batch
+            msg = _batch({**params, "model": model, "output_config": {"effort": "low"}}, "analyse")
+        else:
+            msg = client().messages.create(**params, model=model, **_extra("low", model))
+        _track(msg, "analyse", batch=BATCH)
+        if msg.stop_reason == "refusal" and not last:
+            continue
+        _check(msg)
+        for b in msg.content:
+            if b.type == "tool_use":
+                return dict(b.input)
     raise RuntimeError("Analyse : pas de réponse structurée de Claude.")
 
 
