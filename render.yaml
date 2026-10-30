@@ -1,0 +1,17 @@
+# Déploiement Render (offre gratuite) : New → Blueprint → choisir ce dépôt GitHub.
+# Les secrets (sync: false) sont demandés par Render à la création du service.
+services:
+  - type: web
+    name: series-maths
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+      - key: WORKERS            # 512 Mo de RAM : une série à la fois (pic mesuré ≈ 300 Mo)
+        value: "1"
+      - key: FORWARDED_ALLOW_IPS   # Render passe par un proxy
+        value: "*"

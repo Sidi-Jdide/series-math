@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Séries de maths</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f4e8c'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='serif'>∑</text></svg>">
+<style>
+:root{
+  --bg:#f4f1ea; --bg2:#ebe6db; --card:#fffdf9; --ink:#1b2230; --muted:#6a7180; --line:#e2ddd0; --line2:#d3ccbb;
+  --accent:#1f4e8c; --accent-ink:#fff; --accent-soft:#e6edf7; --ok:#1d7a4a; --ok-soft:#e2f3e9;
+  --err:#b42318; --err-soft:#fdeceb; --warn:#8a5a00; --warn-soft:#fdf3dc; --paper:#fff; --paper-ink:#111;
+  --shadow:0 1px 2px rgba(30,25,10,.05),0 6px 24px -10px rgba(30,25,10,.18);
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#13161c; --bg2:#1a1e26; --card:#1b2029; --ink:#e7e9ee; --muted:#9aa1ae; --line:#2b313d; --line2:#394150;
+    --accent:#7aa7e8; --accent-ink:#0d1420; --accent-soft:#1f2b3e; --ok:#5cc18c; --ok-soft:#17291f;
+    --err:#f08a80; --err-soft:#341b1a; --warn:#e5b45c; --warn-soft:#30261a; --paper:#f7f5f0; --paper-ink:#111;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px -12px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+[v-cloak]{display:none}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1140px;margin:0 auto;padding:22px 16px 64px}
+button,input,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+
+/* --- bandeau --- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:46px;height:46px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:600 26px/1 Georgia,serif;box-shadow:var(--shadow)}
+.brand h1{font-size:23px;margin:0;letter-spacing:-.01em}
+.brand p{margin:1px 0 0;color:var(--muted);font-size:14.5px}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:99px;background:var(--bg2);color:var(--muted)}
+.pill i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.top-r{display:flex;align-items:center;gap:8px}
+.login{max-width:400px;margin:40px auto 0}
+.login h2{font-size:20px;margin:12px 0 4px}
+.lock{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.btn:disabled{opacity:.55;cursor:default;filter:none}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.err{background:var(--err-soft);color:var(--err)}
+
+/* --- mise en page --- */
+.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+.side{position:sticky;top:16px;display:flex;flex-direction:column;gap:20px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.side{position:static}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.card + .card{margin-top:20px}
+.card h2{display:flex;align-items:center;gap:10px;font-size:16.5px;margin:0 0 16px}
+.num{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:13.5px;font-weight:700;flex:none}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+/* --- champs --- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.grid .full{grid-column:1/-1}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted);font-weight:500}
+.field em{color:var(--err);font-style:normal}
+.input{padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--card);width:100%;font-size:15px;transition:border-color .15s,box-shadow .15s}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.input.bad{border-color:var(--err);box-shadow:0 0 0 3px var(--err-soft)}
+textarea.input{min-height:74px;resize:vertical}
+.msg-bad{color:var(--err);font-size:12.5px}
+
+/* --- choix --- */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.choices{grid-template-columns:1fr}}
+.choice{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px;border:1.5px solid var(--line2);border-radius:12px;cursor:pointer;transition:.15s;background:var(--card)}
+.choice:hover{border-color:var(--accent)}
+.choice input{position:absolute;opacity:0;pointer-events:none}
+.choice.on{border-color:var(--accent);background:var(--accent-soft)}
+.choice:has(input:focus-visible){outline:2.5px solid var(--accent);outline-offset:2px}
+.choice .ic{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;background:var(--bg2);color:var(--muted);flex:none}
+.choice.on .ic{background:var(--accent);color:var(--accent-ink)}
+.choice b{display:block;font-size:14.5px}
+.choice small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4;margin-top:2px}
+.check{margin-left:auto;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line2);display:grid;place-items:center;flex:none;color:transparent}
+.choice.on .check{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.choice.radio .check{border-radius:50%}
+.label{font-size:13px;font-weight:600;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+
+details.adv{margin-top:16px;border-top:1px dashed var(--line2);padding-top:12px}
+details.adv summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600;list-style:none;display:flex;align-items:center;gap:6px}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary svg{transition:transform .15s}
+details.adv[open] summary svg{transform:rotate(90deg)}
+details.adv .grid{margin-top:12px}
+
+/* --- aperçu de l'en-tête --- */
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:6px;padding:18px 18px 0;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 10px 30px -14px rgba(0,0,0,.35);font-family:"Times New Roman",Times,serif;overflow:hidden;position:relative}
+.paper::after{content:"";display:block;height:70px;background:repeating-linear-gradient(#fff 0 13px,#ececec 13px 14px);opacity:.9;margin:14px 0 0;mask:linear-gradient(#000,transparent)}
+.hd{border:1.3px solid #000}
+.hd .r{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:5px 9px}
+.hd .r1{border-bottom:.8px solid #000;font-weight:700;font-size:14px}
+.hd .r2{font-size:11.5px}
+.hd .r2 .t{font-weight:700;font-size:14.5px;text-transform:uppercase;text-align:center}
+.hd .c{text-align:center}.hd .e{text-align:right}
+.hd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ph{color:#9a9a9a;font-weight:400;font-style:italic}
+.ex{font-size:13.5px;margin:12px 2px 0}
+.ex u{font-weight:700}
+.prev-foot{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:10px}
+
+/* --- dépôt --- */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;min-height:190px;border:2px dashed var(--line2);border-radius:var(--r);padding:24px 16px;cursor:pointer;background:var(--card);transition:.15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop.over{transform:scale(1.01)}
+.drop .big{width:52px;height:52px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.drop.over .big{background:var(--accent);color:var(--accent-ink)}
+.drop strong{font-size:16px}
+.drop .hint{margin:0}
+.drop.off{opacity:.55;cursor:not-allowed}
+.btn{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:10px;padding:10px 16px;font-weight:600;font-size:14.5px;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none;transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.soft{background:var(--accent-soft);color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--muted);padding:6px 8px}
+.btn.ghost:hover{color:var(--ink);background:var(--bg2)}
+.btn.sm{padding:7px 12px;font-size:13.5px}
+.alert{border-radius:10px;padding:10px 13px;font-size:14px;margin-top:12px}
+.alert.err{background:var(--err-soft);color:var(--err)}
+.alert.warn{background:var(--warn-soft);color:var(--warn)}
+.alert ul{margin:5px 0 0;padding-left:20px}
+.alert b{display:block}
+
+/* --- tâches --- */
+.jobs-head{display:flex;align-items:center;justify-content:space-between;margin:34px 0 12px;gap:10px}
+.jobs-head h2{font-size:18px;margin:0}
+.empty{text-align:center;color:var(--muted);padding:30px 16px;border:1px dashed var(--line2);border-radius:var(--r);font-size:14.5px}
+.jobs{display:grid;gap:14px}
+.job{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
+.job.erreur{border-color:color-mix(in srgb,var(--err) 35%,var(--line))}
+.job-t{display:flex;align-items:center;gap:12px}
+.fi{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.03em;flex:none;background:var(--err-soft);color:var(--err)}
+.fi.word{background:var(--accent-soft);color:var(--accent)}
+.job-n{min-width:0;flex:1}
+.job-n b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job-n small{color:var(--muted);font-size:12.5px}
+.badge{font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;background:var(--bg2);color:var(--muted)}
+.badge.en_cours,.badge.envoi,.badge.en_attente{background:var(--accent-soft);color:var(--accent)}
+.badge.termine{background:var(--ok-soft);color:var(--ok)}
+.badge.erreur{background:var(--err-soft);color:var(--err)}
+.bar{height:5px;border-radius:9px;background:var(--bg2);margin:14px 0 4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:9px;transition:width .6s ease}
+.job.termine .bar i{background:var(--ok)}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+.steps li{display:flex;gap:9px;align-items:center;font-size:13.5px;color:var(--muted)}
+.steps li .d{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--ok-soft);color:var(--ok)}
+.steps li.cur{color:var(--ink);font-weight:500}
+.steps li.cur .d{background:var(--accent-soft);color:var(--accent)}
+.dl{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.spin{width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s .9s linear infinite;flex:none}
+@keyframes s{to{transform:rotate(360deg)}}
+.list-enter-active,.list-leave-active{transition:all .25s ease}
+.list-enter-from,.list-leave-to{opacity:0;transform:translateY(-6px)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:2s!important}}
+footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:36px}
+
+/* --- onglets --- */
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg2);border-radius:12px;margin:0 0 20px;width:max-content;max-width:100%}
+.tabs button{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:14.5px;padding:9px 16px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+
+/* --- en-tête replié --- */
+.sum{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.sum-t{min-width:0;flex:1}
+.sum-t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum-t small{display:block;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.form-end{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.form-end .hint{margin:0}
+.preview h2{margin-bottom:12px}
+.main-col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.main-col > .card + .card{margin-top:0}
+
+/* --- statistiques --- */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.tile span{display:block;font-size:13px;color:var(--muted);font-weight:500}
+.tile b{display:block;font-size:30px;font-weight:650;line-height:1.2;margin:4px 0 2px;letter-spacing:-.01em}
+.tile small{display:block;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-card h2{flex-wrap:wrap;row-gap:2px}
+.chart-card h2 small{font-weight:500;color:var(--muted);font-size:13px}
+.chart{display:flex;gap:8px}
+.chart .y{display:flex;flex-direction:column;justify-content:space-between;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;min-width:14px;margin:-7px 0}
+.plot{position:relative;flex:1;min-width:0}
+.plot svg{display:block;width:100%;height:150px;overflow:visible}
+.grid-l{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+.base-l{stroke:var(--line2);stroke-width:1;vector-effect:non-scaling-stroke}
+.col{fill:var(--accent);transition:opacity .15s}
+.plot:hover .col:not(.hot){opacity:.55}
+.tip{position:absolute;top:-6px;transform:translate(-50%,-100%);background:var(--ink);color:var(--card);font-size:12.5px;padding:5px 9px;border-radius:8px;white-space:nowrap;pointer-events:none;display:flex;gap:6px}
+.x{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin:6px 0 0 22px}
+.table-v{margin-top:14px;font-size:13.5px}
+.table-v summary{cursor:pointer;color:var(--accent);font-weight:600}
+.table-v table{border-collapse:collapse;margin-top:8px;width:100%;max-width:360px}
+.table-v td,.table-v th{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left}
+.table-v td:last-child,.table-v th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.hbars{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hbars li{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) auto;align-items:center;gap:10px;font-size:14px}
+.hbars .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbars .track{height:10px}
+.hbars i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0;min-width:4px}
+.hbars .v{font-weight:600;font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+.stats-foot{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;text-align:center;margin-top:20px}
+
+/* --- téléphone --- */
+@media (max-width:900px){
+  .layout{display:flex;flex-direction:column;align-items:stretch}
+  .main-col,.side{min-width:0}
+  .send{order:-1}                       /* l'envoi d'abord… */
+  .need-ident .send{order:0}            /* …sauf tant que l'en-tête n'est pas rempli */
+  .m-hide{display:none}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:520px){
+  .wrap{padding-top:16px}
+  .top{margin-bottom:14px}
+  .brand p{display:none}
+  .tabs{width:100%}
+  .tabs button{flex:1;justify-content:center}
+  .drop{min-height:150px}
+  .dl .btn{flex:1;justify-content:center;padding:12px}
+  .job{padding:14px}
+  .tile{padding:14px}
+  .tile b{font-size:25px}
+  .hbars li{grid-template-columns:minmax(0,1fr) 70px auto}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div id="app" class="wrap" v-cloak>
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">∑</div>
+      <div>
+        <h1>Séries de maths</h1>
+        <p>Ton en-tête sur n'importe quelle série<span v-if="health.correction">, et une correction détaillée en PDF</span>.</p>
+      </div>
+    </div>
+    <div class="top-r">
+      <span class="pill" :class="status.cls" :title="status.title"><i></i>{{ status.label }}</span>
+      <button class="btn ghost sm" v-if="health.mot_de_passe && health.connecte" @click="logout">Se déconnecter</button>
+    </div>
+  </header>
+
+  <section class="card login" v-if="needLogin">
+    <div class="lock"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    <h2>Connexion</h2>
+    <p class="hint" style="margin:0 0 16px">Cette application est protégée par un mot de passe.</p>
+    <form @submit.prevent="doLogin">
+      <label class="field">
+        Mot de passe
+        <input class="input" :class="{bad: login.error}" type="password" v-model="login.password" autocomplete="current-password" required autofocus>
+      </label>
+      <div class="alert err" v-if="login.error" role="alert">{{ login.error }}</div>
+      <button class="btn" type="submit" :disabled="login.busy || !login.password" style="width:100%;justify-content:center;margin-top:16px">
+        <span class="spin" v-if="login.busy"></span>Se connecter
+      </button>
+    </form>
+    <p class="hint" style="text-align:center">Tu restes connecté 7 jours sur cet appareil.</p>
+  </section>
+
+  <template v-else>
+  <nav class="tabs" role="tablist" aria-label="Vues">
+    <button role="tab" :aria-selected="vue === 'series'" :class="{on: vue === 'series'}" @click="go('series')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Séries
+    </button>
+    <button role="tab" :aria-selected="vue === 'stats'" :class="{on: vue === 'stats'}" @click="go('stats')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Statistiques
+    </button>
+  </nav>
+
+  <template v-if="vue === 'series'">
+  <div class="layout" :class="{'need-ident': !identOk}">
+    <!-- ============ en-tête ============ -->
+    <div class="main-col">
+      <section class="card sum" v-if="!editIdent && identOk">
+        <span class="num">1</span>
+        <div class="sum-t">
+          <b>{{ ident.prof }} · {{ ident.ecole }}</b>
+          <small>{{ ident.classes || 'Classes : …' }} · {{ ident.annee || anneeCourante }} · {{ ident.matiere || 'Mathématiques' }}</small>
+        </div>
+        <button class="btn soft sm" @click="editIdent = true">Modifier</button>
+      </section>
+      <section class="card" v-else>
+        <h2><span class="num">1</span>Ton en-tête</h2>
+        <div class="grid">
+          <label class="field">
+            <span>École <em>*</em></span>
+            <input class="input" :class="{bad: showErrors && !ident.ecole.trim()}" v-model="ident.ecole" placeholder="ex. ECOLE COLLEG1" autocomplete="organization">
+          </label>
+          <label class="field">
+            <span>Professeur <em>*</em></span>
+            <input class="input" :class="{bad: showErrors && !ident.prof.trim()}" v-model="ident.prof" placeholder="ex. TACHEFINE" autocomplete="name">
+          </label>
+          <label class="field">
+            Année scolaire
+            <input class="input" v-model="ident.annee" :placeholder="'ex. ' + anneeCourante">
+          </label>
+          <label class="field">
+            Classes
+            <input class="input" v-model="ident.classes" placeholder="ex. 4AS1 - 4AS2">
+          </label>
+          <label class="field">
+            Matière
+            <input class="input" v-model="ident.matiere" placeholder="Mathématiques">
+          </label>
+          <label class="field">
+            Titre
+            <input class="input" v-model="ident.titre" placeholder="Vide = trouvé par Claude">
+          </label>
+        </div>
+        <p class="msg-bad" v-if="showErrors && !identOk" style="margin:10px 0 0">Remplis au moins l'école et le nom du professeur.</p>
+        <div class="form-end" v-else>
+          <p class="hint">Gardé sur cet appareil pour la prochaine fois.</p>
+          <button class="btn sm" v-if="identOk" @click="editIdent = false">Valider</button>
+        </div>
+      </section>
+
+      <section class="card" v-if="health.correction || health.resaisie">
+        <h2><span class="num">2</span>Ce que tu veux</h2>
+        <div class="choices">
+          <label class="choice" :class="{on: opts.sujet}">
+            <input type="checkbox" v-model="opts.sujet">
+            <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+            <span><b>Sujet</b><small>L'énoncé avec ton en-tête, anciens noms effacés</small></span>
+            <span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 12l5 5 9-10"/></svg></span>
+          </label>
+          <label class="choice" :class="{on: opts.correction}" v-if="health.correction">
+            <input type="checkbox" v-model="opts.correction">
+            <span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+            <span><b>Correction</b><small>Détaillée, étape par étape, dans un PDF à part</small></span>
+            <span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 12l5 5 9-10"/></svg></span>
+          </label>
+        </div>
+        <p class="msg-bad" v-if="!opts.sujet && !opts.correction" style="margin:8px 0 0">Coche au moins un des deux.</p>
+
+        <template v-if="opts.sujet && health.resaisie">
+          <div class="label">Mise en page du sujet</div>
+          <div class="choices" role="radiogroup">
+            <label class="choice radio" :class="{on: opts.mode === 'original'}">
+              <input type="radio" value="original" v-model="opts.mode">
+              <span><b>Garder l'original</b><small>Le plus fidèle, figures comprises</small></span>
+              <span class="check"><svg width="10" height="10" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg></span>
+            </label>
+            <label class="choice radio" :class="{on: opts.mode === 'resaisir'}">
+              <input type="radio" value="resaisir" v-model="opts.mode">
+              <span><b>Re-saisir proprement</b><small>Pour un scan ou un Word mal converti</small></span>
+              <span class="check"><svg width="10" height="10" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg></span>
+            </label>
+          </div>
+        </template>
+
+      </section>
+
+      <section class="send">
+        <div class="drop" :class="{over: dragging, off: !canSend}" tabindex="0" role="button"
+             aria-label="Choisir des fichiers à envoyer"
+             @click="pick" @keydown.enter.prevent="pick" @keydown.space.prevent="pick"
+             @dragenter.prevent="dragging = true" @dragover.prevent="dragging = true"
+             @dragleave.prevent="dragging = false" @drop.prevent="onDrop">
+          <span class="big"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></span>
+          <strong v-if="tactile">Touche ici pour choisir une série</strong>
+          <strong v-else>{{ dragging ? 'Lâche le fichier ici' : 'Dépose tes séries ici' }}</strong>
+          <p class="hint"><template v-if="!tactile">ou <a href="#" @click.prevent>clique pour choisir</a> · </template>PDF ou Word · {{ health.max_mb }} Mo max</p>
+          <input ref="fileInput" type="file" accept=".pdf,.docx,.doc" multiple hidden @change="onPick">
+        </div>
+        <div class="alert err" v-if="dropError" role="alert">{{ dropError }}</div>
+        <details class="adv">
+          <summary><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg>Options avancées</summary>
+          <div class="grid">
+            <label class="field" v-if="health.resaisie">
+              Exercices à retirer
+              <input class="input" v-model="opts.retirer" placeholder="ex. 1, 3-4" inputmode="numeric">
+            </label>
+            <label class="field full">
+              Autres textes à effacer <span style="font-weight:400">(un par ligne)</span>
+              <textarea class="input" v-model="opts.effacer" placeholder="Nom d'un ancien prof, d'une ancienne école…"></textarea>
+            </label>
+          </div>
+        </details>
+      </section>
+    </div>
+
+    <!-- ============ aperçu ============ -->
+    <aside class="side">
+      <section class="card preview" :class="{'m-hide': !editIdent && identOk}">
+        <h2>Aperçu de l'en-tête</h2>
+        <div class="paper" aria-label="Aperçu de l'en-tête du PDF">
+          <div class="hd">
+            <div class="r r1">
+              <span :class="{ph: !ident.ecole}">{{ ident.ecole || 'ÉCOLE' }}</span>
+              <span class="c">PROF : <span :class="{ph: !ident.prof}">{{ ident.prof || 'NOM' }}</span></span>
+              <span class="e" :class="{ph: !ident.annee}">{{ ident.annee || anneeCourante }}</span>
+            </div>
+            <div class="r r2">
+              <span :class="{ph: !ident.matiere}">{{ ident.matiere || 'Mathématiques' }}</span>
+              <span class="t" :class="{ph: !ident.titre}">{{ ident.titre || 'Titre automatique' }}</span>
+              <span class="e">Classes : <span :class="{ph: !ident.classes}">{{ ident.classes || '…' }}</span></span>
+            </div>
+          </div>
+          <p class="ex"><u>Exercice 1</u> : Calculer <i>A</i> = 27 − (−1) × 5/3.</p>
+        </div>
+        <div class="prev-foot">
+          <span>Pied de page : <i>Classes : {{ ident.classes || '…' }}</i></span>
+          <span><b><i>Prof : {{ ident.prof || '…' }}</i></b></span>
+        </div>
+      </section>
+
+    </aside>
+  </div>
+
+  <!-- ============ tâches ============ -->
+  <div class="jobs-head">
+    <h2>Mes séries <span v-if="jobs.length" style="color:var(--muted);font-weight:500">({{ jobs.length }})</span></h2>
+    <button class="btn ghost sm" v-if="jobs.some(j => j.etat === 'erreur')" @click="clearErrors">Effacer les erreurs</button>
+  </div>
+
+  <div class="empty" v-if="!jobs.length">Aucune série pour l'instant. Les séries terminées sont enregistrées dans ce navigateur.</div>
+
+  <transition-group tag="div" class="jobs" name="list" aria-live="polite">
+    <article class="job" v-for="j in jobs" :key="j.key" :class="j.etat">
+      <div class="job-t">
+        <span class="fi" :class="{word: !j.nom.toLowerCase().endsWith('.pdf')}">{{ ext(j.nom) }}</span>
+        <div class="job-n">
+          <b :title="j.nom">{{ j.nom }}</b>
+          <small>{{ subtitle(j) }}</small>
+        </div>
+        <span class="badge" :class="j.etat">
+          <span class="spin" v-if="running(j)"></span>{{ badge(j) }}
+        </span>
+        <button class="btn ghost" v-if="!running(j)" @click="forget(j)" :title="j.garde ? 'Supprimer de l\'historique' : 'Retirer de la liste'" :aria-label="j.garde ? 'Supprimer de l\'historique' : 'Retirer de la liste'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="bar" v-if="j.etat !== 'erreur'"><i :style="{width: progress(j) + '%'}"></i></div>
+
+      <ul class="steps" v-if="j.etapes.length && j.etat !== 'termine'">
+        <li v-for="(s, i) in j.etapes" :key="i" :class="{cur: i === j.etapes.length - 1 && running(j)}">
+          <span class="d">
+            <span class="spin" v-if="i === j.etapes.length - 1 && running(j)" style="width:10px;height:10px"></span>
+            <svg v-else width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M5 12l5 5 9-10"/></svg>
+          </span>{{ s }}
+        </li>
+      </ul>
+
+      <template v-if="j.etat === 'termine' && j.resultat">
+        <div class="dl">
+          <a class="btn" v-for="f in j.resultat.fichiers" :key="f" :href="fileUrl(j, f)" :download="f">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>
+            {{ f.includes('correction') ? 'Correction' : 'Sujet' }} (PDF)
+          </a>
+          <button class="btn soft" v-if="canShare && j.pdfs" @click="share(j)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            Partager
+          </button>
+        </div>
+        <p class="hint" v-if="j.resultat.cout_estime !== undefined">
+          Coût Claude estimé : {{ j.resultat.cout_estime.toFixed(2).replace('.', ',') }} $
+          <span v-if="j.resultat.reutilise">(réponse de Claude réutilisée pour ce fichier)</span>
+          <span v-if="j.garde"> · enregistré dans ce navigateur</span>
+        </p>
+        <div class="alert warn" v-if="j.resultat.erreurs_enonce && j.resultat.erreurs_enonce.length">
+          <b>Erreurs trouvées dans l'énoncé</b>
+          <ul><li v-for="(e, i) in j.resultat.erreurs_enonce" :key="i">{{ e }}</li></ul>
+        </div>
+        <div class="alert warn" v-if="j.resultat.avertissements && j.resultat.avertissements.length">
+          <b>À vérifier</b>
+          <ul><li v-for="(e, i) in j.resultat.avertissements" :key="i">{{ e }}</li></ul>
+        </div>
+      </template>
+
+      <div class="alert err" v-if="j.etat === 'erreur'" role="alert">
+        {{ j.erreur || 'Erreur.' }}
+        <div v-if="j.file" style="margin-top:8px">
+          <button class="btn sm soft" @click="retry(j)">Réessayer</button>
+        </div>
+      </div>
+    </article>
+  </transition-group>
+  </template>
+
+  <!-- ============ statistiques ============ -->
+  <template v-else>
+  <div class="tiles">
+    <div class="tile"><span>Séries faites</span><b>{{ st.total }}</b>
+      <small>{{ st.depuis ? 'depuis le ' + dateAn(st.depuis) : 'aucune pour l’instant' }}</small></div>
+    <div class="tile"><span>Ce mois-ci</span><b>{{ st.mois }}</b><small>{{ moisCourant }}</small></div>
+    <div class="tile"><span>Pages traitées</span><b>{{ st.pages }}</b><small>{{ st.exercices }} exercices</small></div>
+    <div class="tile"><span>Coût Claude</span><b>{{ dollars(st.cout) }}</b>
+      <small>{{ st.total ? '≈ ' + dollars(st.moyen, 3) + ' par série' : '—' }}</small></div>
+  </div>
+
+  <section class="card chart-card">
+    <h2>Séries par jour <small>30 derniers jours · {{ st.recents }} au total</small></h2>
+    <div class="chart" @mouseleave="tip = null">
+      <div class="y"><span>{{ st.max }}</span><span>0</span></div>
+      <div class="plot">
+        <svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img"
+             :aria-label="'Séries par jour sur 30 jours, ' + st.recents + ' au total'">
+          <line x1="0" x2="600" y1="0.5" y2="0.5" class="grid-l"/>
+          <line x1="0" x2="600" y1="149.5" y2="149.5" class="base-l"/>
+          <g v-for="(j, i) in st.jours" :key="i">
+            <path v-if="j.n" class="col" :class="{hot: tip && tip.i === i}" :d="colPath(i, j.n)"/>
+            <rect :x="i * 20" y="0" width="20" height="150" fill="transparent"
+                  @mouseenter="tip = {i, j}" @click="tip = {i, j}"/>
+          </g>
+        </svg>
+        <div class="tip" v-if="tip" :style="{left: Math.min(86, Math.max(14, (tip.i + .5) / 30 * 100)) + '%'}">
+          <b>{{ tip.j.n }} série{{ tip.j.n > 1 ? 's' : '' }}</b>{{ dateCourte(tip.j.d) }}
+        </div>
+      </div>
+    </div>
+    <div class="x"><span>{{ dateCourte(st.jours[0].d) }}</span><span>{{ dateCourte(st.jours[15].d) }}</span><span>aujourd'hui</span></div>
+    <details class="table-v">
+      <summary>Voir en tableau</summary>
+      <table>
+        <tr><th>Jour</th><th>Séries</th></tr>
+        <tr v-for="j in st.jours.filter(x => x.n)" :key="+j.d"><td>{{ dateLongue(j.d) }}</td><td>{{ j.n }}</td></tr>
+        <tr v-if="!st.recents"><td colspan="2">Aucune série sur cette période.</td></tr>
+      </table>
+    </details>
+  </section>
+
+  <section class="card" v-if="st.chapitres.length">
+    <h2>Chapitres les plus fréquents</h2>
+    <ul class="hbars">
+      <li v-for="[t, n] in st.chapitres" :key="t">
+        <span class="t" :title="t">{{ t }}</span>
+        <span class="track"><i :style="{width: (n / st.chapMax * 100) + '%'}"></i></span>
+        <span class="v">{{ n }}</span>
+      </li>
+    </ul>
+  </section>
+
+  <p class="hint stats-foot">Statistiques de ce navigateur, sur cet appareil.
+    <button class="btn ghost sm" v-if="st.total" @click="resetStats">Remettre à zéro</button></p>
+  </template>
+  </template>
+
+  <footer>Les fichiers sont supprimés du serveur après 24 h ; tes séries terminées restent enregistrées dans ce navigateur.</footer>
+</div>
+
+<script src="/static/vue/vue.global.prod.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+services:
+  series:
+    build: .
+    ports: ["8000:8000"]
+    env_file: .env
+    volumes: ["series-data:/data"]
+    restart: unless-stopped
+volumes:
+  series-data:

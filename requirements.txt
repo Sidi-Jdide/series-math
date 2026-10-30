@@ -1,0 +1,7 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+anthropic>=0.50
+pymupdf>=1.25
+playwright>=1.48
+lxml>=5.0
